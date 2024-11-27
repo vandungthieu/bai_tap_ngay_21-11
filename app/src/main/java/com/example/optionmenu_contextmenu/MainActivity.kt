@@ -1,7 +1,6 @@
 package com.example.optionmenu_contextmenu
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import android.content.Intent
 import android.view.ContextMenu
 import android.view.Menu
@@ -9,77 +8,83 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ListView
 import android.widget.AdapterView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var lv: ListView
-    private val REQUEST_CODE_ADD = 100
-    private val REQUEST_CODE_EDIT = 101
 
-    private val name = listOf(
-        "Nguyễn Văn A",
-        "Trần Thị B",
-        "Lê Văn C",
-        "Phạm Thị D",
-        "Hoàng Văn E",
-        "Vũ Thị F",
-        "Đinh Văn G",
-        "Trịnh Thị H",
-        "Bùi Văn I",
-        "Đặng Thị K",
-        "Nguyễn Thị L",
-        "Phạm Văn M",
-        "Trần Thị N",
-        "Lê Văn O",
-        "Hoàng Thị P",
-        "Vũ Văn Q",
-        "Đinh Thị R",
-        "Trịnh Văn S",
-        "Bùi Thị T",
-        "Đặng Văn U"
+    private val students = mutableListOf(
+        StudentModel("Nguyễn Văn An", "SV001"),
+        StudentModel("Trần Thị Bảo", "SV002"),
+        StudentModel("Lê Hoàng Cường", "SV003"),
+        StudentModel("Phạm Thị Dung", "SV004"),
+        StudentModel("Đỗ Minh Đức", "SV005"),
+        StudentModel("Vũ Thị Hoa", "SV006"),
+        StudentModel("Hoàng Văn Hải", "SV007"),
+        StudentModel("Bùi Thị Hạnh", "SV008"),
+        StudentModel("Đinh Văn Hùng", "SV009"),
+        StudentModel("Nguyễn Thị Linh", "SV010"),
+        StudentModel("Phạm Văn Long", "SV011"),
+        StudentModel("Trần Thị Mai", "SV012"),
+        StudentModel("Lê Thị Ngọc", "SV013"),
+        StudentModel("Vũ Văn Nam", "SV014"),
+        StudentModel("Hoàng Thị Phương", "SV015"),
+        StudentModel("Đỗ Văn Quân", "SV016"),
+        StudentModel("Nguyễn Thị Thu", "SV017"),
+        StudentModel("Trần Văn Tài", "SV018"),
+        StudentModel("Phạm Thị Tuyết", "SV019"),
+        StudentModel("Lê Văn Vũ", "SV020")
     )
 
-    private val mssv = listOf(
-        "SV001",
-        "SV002",
-        "SV003",
-        "SV004",
-        "SV005",
-        "SV006",
-        "SV007",
-        "SV008",
-        "SV009",
-        "SV010",
-        "SV011",
-        "SV012",
-        "SV013",
-        "SV014",
-        "SV015",
-        "SV016",
-        "SV017",
-        "SV018",
-        "SV019",
-        "SV020"
-    )
+    private lateinit var studentAdapter: StudentAdapter
 
-    private val myList: ArrayList<Student> = ArrayList()
+    private lateinit var addStudentLauncher: ActivityResultLauncher<Intent>
+    private lateinit var editStudentLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        lv = findViewById(R.id.lv)
+        lv = findViewById(R.id.list_view_students)
 
-        for (i in name.indices) {
-            myList.add(Student( name[i], mssv[i] ))
-        }
-
-        val adapter = StudentAdapter(this, R.layout.layout_item, myList)
-        lv.adapter = adapter
+        studentAdapter = StudentAdapter(this, R.layout.layout_student_item, ArrayList(students))
+        lv.adapter = studentAdapter
 
         registerForContextMenu(lv)
+
+        // Register the launcher for adding students
+        addStudentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val name = data?.getStringExtra("name")
+                val mssv = data?.getStringExtra("mssv")
+
+                if (name != null && mssv != null) {
+                    students.add(StudentModel(name, mssv))
+                    studentAdapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+        // Register the launcher for editing students
+        editStudentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val updatedName = data?.getStringExtra("name")
+                val updatedMssv = data?.getStringExtra("mssv")
+                val position = data?.getIntExtra("position", -1)
+
+                if (updatedName != null && updatedMssv != null && position != null && position >= 0) {
+                    val student = students[position]
+                    student.studentName = updatedName
+                    student.studentId = updatedMssv
+                    studentAdapter.notifyDataSetChanged()
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -89,42 +94,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.menu_add -> {
+            R.id.action_add_new -> {
                 val intent = Intent(this, AddStudentActivity::class.java)
-                startActivityForResult(intent, REQUEST_CODE_ADD)
+                addStudentLauncher.launch(intent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_ADD && resultCode == RESULT_OK) {
-            val name = data?.getStringExtra("name")
-            val mssv = data?.getStringExtra("mssv")
-
-            if (name != null && mssv != null) {
-                myList.add(Student(name, mssv))
-                (lv.adapter as StudentAdapter).notifyDataSetChanged()
-            }
-        }
-
-        // Xử lý dữ liệu trả về từ EditStudentActivity
-        if (requestCode == REQUEST_CODE_EDIT && resultCode == RESULT_OK) {
-            val updatedName = data?.getStringExtra("name")
-            val updatedMssv = data?.getStringExtra("mssv")
-            val position = data?.getIntExtra("position", -1)
-
-            if (updatedName != null && updatedMssv != null && position != null && position >= 0) {
-                // Cập nhật đối tượng trong myList tại vị trí đã chỉnh sửa
-                val student = myList[position]
-                student.name = updatedName
-                student.mssv = updatedMssv
-
-                // Thông báo cập nhật cho Adapter
-                (lv.adapter as StudentAdapter).notifyDataSetChanged()
-            }
         }
     }
 
@@ -142,20 +117,22 @@ class MainActivity : AppCompatActivity() {
         val position = info.position
 
         return when (item.itemId) {
-            R.id.menu_edit -> {
-                val student = myList[position]
+            R.id.action_edit -> {
+                val student = students[position]
                 val intent = Intent(this, EditStudentActivity::class.java)
-                intent.putExtra("name", student.name)
-                intent.putExtra("mssv", student.mssv)
+                intent.putExtra("name", student.studentName)
+                intent.putExtra("mssv", student.studentId)
                 intent.putExtra("position", position)
-                startActivityForResult(intent, REQUEST_CODE_EDIT)
+                editStudentLauncher.launch(intent)
                 true
             }
-            R.id.menu_remove -> {
-                myList.removeAt(position)
-                (lv.adapter as StudentAdapter).notifyDataSetChanged()
+
+            R.id.action_remove -> {
+                students.removeAt(position)
+                studentAdapter.notifyDataSetChanged()
                 true
             }
+
             else -> super.onContextItemSelected(item)
         }
     }

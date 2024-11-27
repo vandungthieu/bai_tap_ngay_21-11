@@ -12,9 +12,9 @@ class AddStudentActivity : AppCompatActivity() {
         setContentView(R.layout.activity_add_student)
 
         // Xử lý thêm sinh viên khi bấm nút "Lưu"
-        findViewById<Button>(R.id.btnSave).setOnClickListener {
-            val name = findViewById<EditText>(R.id.newName).text.toString()
-            val mssv = findViewById<EditText>(R.id.newMSSV).text.toString()
+        findViewById<Button>(R.id.button_ok).setOnClickListener {
+            val name = findViewById<EditText>(R.id.add_hoten).text.toString()
+            val mssv = findViewById<EditText>(R.id.add_mssv).text.toString()
 
             if (name.isNotEmpty() && mssv.isNotEmpty()) {
                 val resultIntent = Intent()
@@ -23,6 +23,10 @@ class AddStudentActivity : AppCompatActivity() {
                 setResult(RESULT_OK, resultIntent)
                 finish()
             }
+        }
+
+        findViewById<Button>(R.id.button_cancel).setOnClickListener{
+            finish()
         }
     }
 }

@@ -9,18 +9,18 @@ import android.widget.TextView
 class StudentAdapter(
     private val context: Activity,
     private val layoutId: Int,
-    private val myList: ArrayList<Student>
-): ArrayAdapter<Student>(context, layoutId, myList) {
+    private val myList: ArrayList<StudentModel>
+): ArrayAdapter<StudentModel>(context, layoutId, myList) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(layoutId, parent, false)
 
         val student = myList[position]
 
-        val nameView = view.findViewById<TextView>(R.id.tvname)
-        val mssvView = view.findViewById<TextView>(R.id.tvmssv)
+        val nameView = view.findViewById<TextView>(R.id.text_student_name)
+        val mssvView = view.findViewById<TextView>(R.id.text_student_id)
 
-        nameView.text = student.name
-        mssvView.text = student.mssv
+        nameView.text = student.studentName
+        mssvView.text = student.studentId
 
         return view
     }

@@ -2,23 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="83dp"
+    android:padding="16dp"
+    android:paddingTop="32dp"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="15dp"
-        android:text="Danh sách sinh viên"
-        android:textSize="24sp" />
+        android:text="Danh Sách Sinh Viên"
+        android:textSize="30dp"/>
 
     <ListView
-        android:id="@+id/lv"
+        android:id="@+id/list_view_students"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingStart="5dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="16dp" />
+
 </LinearLayout>
